@@ -42,6 +42,33 @@
             flex-direction: column;
             width: 100%;
             height: 100%;
+            position: relative;
+        }
+        
+        .game-title {
+            position: absolute;
+            top: 2vmin;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 7vmin, 5rem);
+            z-index: 10;
+            animation: rgb-text-glow 5s linear infinite;
+        }
+        
+        @keyframes rgb-text-glow {
+            0% {
+                color: var(--glow-color);
+                text-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color), 0 0 30px #fff;
+            }
+            50% {
+                color: var(--secondary-glow);
+                text-shadow: 0 0 10px var(--secondary-glow), 0 0 20px var(--secondary-glow), 0 0 30px #fff;
+            }
+            100% {
+                color: var(--glow-color);
+                text-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color), 0 0 30px #fff;
+            }
         }
 
         #game-area {
@@ -51,7 +78,8 @@
             align-items: center;
             padding: 2vmin;
             box-sizing: border-box;
-            position: relative;
+            width: 100%;
+            height: 100%;
         }
         
         .side-panel {
@@ -60,7 +88,8 @@
             justify-content: center;
             align-items: center;
             height: 100%;
-            padding: 0 4vmin;
+            padding: 0 2.5vmin;
+            flex-shrink: 0;
         }
 
         #left-panel .lines-display {
@@ -82,15 +111,14 @@
             color: var(--glow-color);
         }
 
-
         #right-panel {
             gap: 2vmin;
         }
 
         #spinButton {
             font-family: 'Orbitron', sans-serif;
-            width: clamp(90px, 18vmin, 140px);
-            height: clamp(90px, 18vmin, 140px);
+            width: clamp(90px, 20vmin, 160px);
+            height: clamp(90px, 20vmin, 160px);
             border: 3px solid var(--glow-color);
             border-radius: 50%;
             background-image: linear-gradient(to bottom, rgba(0, 255, 195, 0.3), rgba(0, 255, 195, 0.1));
@@ -160,8 +188,8 @@
         }
 
         .reel {
-            width: clamp(60px, 15vmin, 140px);
-            height: clamp(180px, 45vmin, 420px);
+            width: clamp(80px, 16vmin, 220px);
+            height: clamp(240px, 48vmin, 660px);
             overflow: hidden;
             background: linear-gradient(135deg, rgba(249, 0, 255, 0.1), rgba(0, 255, 195, 0.1));
             border-radius: 1vmin;
@@ -172,7 +200,7 @@
         .reel-strip { position: absolute; top: 0; left: 0; width: 100%; transition: opacity 0.3s ease-out; }
         .symbol {
             width: 100%;
-            height: clamp(60px, 15vmin, 140px);
+            height: clamp(80px, 16vmin, 220px);
             display: flex; justify-content: center; align-items: center; box-sizing: border-box; position: relative;
         }
         .symbol img {
@@ -180,31 +208,42 @@
         }
 
         #ui-panel {
-            flex-shrink: 0;
+            position: absolute;
+            bottom: 0;
+            left: 0;
             width: 100%;
-            padding: 1.5vmin 2vmin;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
+            padding: 2vmin;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 1.5vmin;
             box-sizing: border-box;
-            border-top: 2px solid var(--glow-color);
-            box-shadow: 0 -5px 20px rgba(0, 255, 195, 0.3);
         }
 
         .info-bar {
             display: flex;
-            justify-content: space-between;
+            justify-content: space-around;
             align-items: center;
             width: 100%;
             max-width: 1200px;
             font-size: clamp(0.9rem, 2vmin, 1.2rem);
         }
-        .info-box { text-align: center; }
+        
+        .info-box { 
+            text-align: center; 
+        }
+
+        #balance-box, #win-box {
+            background: rgba(0,0,0,0.3);
+            border: 2px solid var(--glow-color);
+            border-radius: 1.5vmin;
+            padding: 1vmin 2vmin;
+            box-shadow: 0 0 1.5vmin var(--glow-color);
+            backdrop-filter: blur(5px);
+        }
+
         .info-box span { font-family: 'Orbitron', sans-serif; display: block; font-size: clamp(1rem, 2.5vmin, 1.5rem); color: var(--glow-color);}
-        #message-box { font-family: 'Orbitron', sans-serif; font-size: clamp(1.1rem, 3vmin, 1.8rem); color: var(--win-glow-color); text-shadow: 0 0 10px var(--win-glow-color);}
+        #message-box { font-family: 'Orbitron', sans-serif; font-size: clamp(1.1rem, 3vmin, 1.8rem); color: var(--win-glow-color); text-shadow: 0 0 10px var(--win-glow-color); padding: 1vmin; }
         
         #bet-selection-bar {
             display: flex;
@@ -253,10 +292,8 @@
             filter: grayscale(1) brightness(0.7);
             cursor: not-allowed;
         }
-
-        h1.title { display: none; } /* Title is hidden as per new layout */
-
-        /* Win/Animation styles remain unchanged */
+        
+        /* Win/Animation styles */
         #win-lines-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
         #win-lines-svg { overflow: visible; width: 100%; height: 100%; }
         .win-line { fill: none; stroke: var(--secondary-glow); stroke-width: 5px; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 5px var(--secondary-glow)) drop-shadow(0 0 15px var(--secondary-glow)); stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: draw-line 0.8s ease-out forwards, blink-line 1s linear infinite 0.8s; }
@@ -274,7 +311,7 @@
         #game-area.anticipation-glow .reels-container { animation: anticipation-pulse 1.2s infinite; }
         @keyframes anticipation-pulse { 0%, 100% { box-shadow: 0 0 3vmin var(--glow-color), inset 0 0 2vmin rgba(0, 255, 195, 0.5); } 50% { box-shadow: 0 0 8vmin var(--anticipation-glow-color), inset 0 0 4vmin var(--anticipation-glow-color); } }
 
-        /* Modal styles remain unchanged */
+        /* Modal styles */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; text-align: center; color: #fff; z-index: 1000; }
         .modal-content { font-family: 'Orbitron', sans-serif; animation: modal-appear 1s forwards; background: rgba(10, 0, 20, 0.95); border: 2px solid var(--glow-color); border-radius: 2vmin; padding: 3vmin; max-width: 90vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 0 50px var(--secondary-glow); }
         @keyframes modal-appear { 0% { transform: scale(0.5) rotate(-15deg); opacity: 0; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
@@ -287,12 +324,86 @@
         .bonus-transition-content h1 { font-size: clamp(3rem, 10vmin, 8rem); color: var(--win-glow-color); text-shadow: 0 0 10px var(--win-glow-color), 0 0 30px var(--win-glow-color), 0 0 60px var(--secondary-glow); margin: 0; }
         .bonus-transition-content p { font-size: clamp(1rem, 3vmin, 2rem); color: #fff; margin-top: 2vmin; text-shadow: 0 0 10px #000; }
         @keyframes bonus-pulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.05); opacity: 1; } }
+
+        /* --- НОВИ СТИЛОВЕ ЗА АДАПТИВЕН ДИЗАЙН (PORTRAIT MODE) --- */
+        @media (max-aspect-ratio: 5/6) {
+            
+            /* Пренареждане на основната игрална зона във вертикална колона */
+            #game-area {
+                flex-direction: column;
+                justify-content: center;
+                padding-top: 12vmin; /* Място за заглавието */
+                padding-bottom: 38vmin; /* Място за долния UI панел */
+                gap: 2vh;
+            }
+            
+            .game-title { font-size: 8vmin; }
+
+            /* Барабаните заемат цялата ширина */
+            .reels-container {
+                order: 1; /* Барабаните са първи */
+                width: 95vw;
+                height: 57vw; /* Поддържане на съотношение 5:3 */
+                padding: 1.5vw;
+                gap: 1vw;
+            }
+            .reel {
+                width: 100%; /* Flexbox се грижи за разпределението */
+                height: 100%;
+            }
+            .symbol {
+                height: 33.333%; /* 3 символа запълват барабана */
+            }
+            .symbol img {
+                max-width: 80%;
+                max-height: 80%;
+            }
+
+            /* Пренареждане на контролите под барабаните */
+            #left-panel, #right-panel {
+                order: 2; /* Контролите са втори */
+                height: auto;
+                padding: 0;
+            }
+
+            #right-panel {
+                flex-direction: row;
+                gap: 4vw;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            #left-panel {
+                transform: scale(0.9);
+            }
+
+            /* Адаптация на долния UI панел */
+            #ui-panel {
+                padding: 1.5vmin;
+                gap: 1vmin;
+                justify-content: flex-end;
+                height: 38vmin;
+            }
+            .info-bar {
+                font-size: clamp(0.8rem, 2.8vmin, 1.1rem);
+            }
+            #bet-selection-bar {
+                flex-wrap: wrap; /* Бутоните за залог могат да минат на нов ред */
+                gap: 1.5vmin;
+            }
+            .bet-select-btn {
+                padding: 1.5vmin 2.5vmin;
+            }
+        }
+
     </style>
 </head>
 <body>
 
     <div id="game-container">
         
+        <h1 class="game-title">Wild Angels</h1>
+
         <div id="game-area">
             <div id="left-panel" class="side-panel">
                  <div class="lines-display">
@@ -307,6 +418,9 @@
                 <div class="reel" id="reel2"></div>
                 <div class="reel" id="reel3"></div>
                 <div class="reel" id="reel4"></div>
+                 <div id="win-lines-container">
+                    <svg id="win-lines-svg"></svg>
+                </div>
             </div>
             
             <div id="right-panel" class="side-panel">
@@ -317,17 +431,13 @@
                 <button id="autoSpinButton">AUTO</button>
                  <button id="buyBonusButton">КУПИ БОНУС</button>
             </div>
-
-             <div id="win-lines-container">
-                <svg id="win-lines-svg"></svg>
-            </div>
         </div>
 
         <div id="ui-panel">
             <div class="info-bar">
-                <div class="info-box">Баланс:<span id="balance">1000</span></div>
+                <div class="info-box" id="balance-box">Баланс:<span id="balance">1000</span></div>
                 <div class="info-box" id="message-box">ИЗБЕРЕТЕ ЗАЛОГ</div>
-                <div class="info-box">Печалба:<span id="win">0</span></div>
+                <div class="info-box" id="win-box">Печалба:<span id="win">0</span></div>
             </div>
             <div id="bet-selection-bar">
                 <!-- Bet buttons will be generated by JS -->
@@ -497,10 +607,11 @@
                 return new Promise(async (resolve) => {
                     const reelStripElement = reel.querySelector('.reel-strip');
                     const strip = reelStrips[i];
-                    const symbolHeight = reel.clientHeight / SYMBOLS_PER_REEL_VISIBLE;
                     
-                    const baseTargetPosition = finalIndexes[i] * symbolHeight;
-                    const loopOffset = strip.length * symbolHeight;
+                    const symbolSize = reel.clientHeight / SYMBOLS_PER_REEL_VISIBLE;
+                    
+                    const baseTargetPosition = finalIndexes[i] * symbolSize;
+                    const loopOffset = strip.length * symbolSize;
                     
                     reelStripElement.style.transition = 'none';
                     reelStripElement.style.transform = `translateY(-${baseTargetPosition + loopOffset}px)`;
@@ -557,11 +668,9 @@
             }
         });
 
-        // Spacebar to Spin
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
-                // Prevent spin if a modal is open
                 if (document.querySelector('.modal[style*="display: flex"]')) return;
                 spinButton.click();
             }
@@ -584,9 +693,6 @@
             buyBonusButton.disabled = disabled || freeSpinsRemaining > 0;
             betSelectionBar.style.pointerEvents = disabled ? 'none' : 'auto';
         }
-
-        // --- ALL OTHER FUNCTIONS (win checking, drawing lines etc.) are mostly the same ---
-        // ... just copying them here for completeness.
 
         function handleNextAction(hasWin, bonusTriggered) {
             const winDelay = hasWin ? (expandingSymbol ? 2500 : 1500) : 250;
@@ -811,11 +917,12 @@
         function drawWinningLines(winningLines) {
             const reelContainerRect = document.querySelector('.reels-container').getBoundingClientRect();
             const svgRect = winLinesSvg.getBoundingClientRect();
-             if (reels.length === 0) return;
+             if (reels.length === 0 || !reelContainerRect || !svgRect) return;
 
             winningLines.forEach(lineCoords => {
                 const points = lineCoords.map(coord => {
                     const reel = reels[coord.reel];
+                    if (!reel) return '0,0';
                     const reelRect = reel.getBoundingClientRect();
                     const symbolHeight = reelRect.height / SYMBOLS_PER_REEL_VISIBLE;
                     
