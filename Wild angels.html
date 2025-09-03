@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Wild Angels - Neon Dream</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Poppins:wght@400;600&display=swap');
+
+        :root {
+            --glow-color: #00ffc3; /* Светло зелено/тюркоаз */
+            --secondary-glow: #f900ff; /* Ярко розово/магента */
+            --win-glow-color: #ffee00;
+            --anticipation-glow-color: #ffc400;
+            --scatter-glow-color: #f900ff; /* Розово за скатер */
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            color: #fff;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f900ff, #00ffc3, #2e005e, #100a1c);
+            background-size: 400% 400%;
+            animation: color-shift 15s ease-in-out infinite;
+        }
+
+        @keyframes color-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+
+        #game-area {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2vmin;
+            box-sizing: border-box;
+            position: relative;
+        }
+        
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 0 4vmin;
+        }
+
+        #left-panel .lines-display {
+            background: rgba(0,0,0,0.5);
+            border: 2px solid var(--glow-color);
+            border-radius: 1.5vmin;
+            padding: 2vmin;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            box-shadow: 0 0 2vmin var(--glow-color);
+        }
+        #left-panel .lines-display span {
+            font-size: clamp(2rem, 6vmin, 4rem);
+            display: block;
+        }
+        #left-panel .lines-display p {
+            margin: 0;
+            font-size: clamp(1rem, 3vmin, 1.5rem);
+            color: var(--glow-color);
+        }
+
+
+        #right-panel {
+            gap: 2vmin;
+        }
+
+        #spinButton {
+            font-family: 'Orbitron', sans-serif;
+            width: clamp(90px, 18vmin, 140px);
+            height: clamp(90px, 18vmin, 140px);
+            border: 3px solid var(--glow-color);
+            border-radius: 50%;
+            background-image: linear-gradient(to bottom, rgba(0, 255, 195, 0.3), rgba(0, 255, 195, 0.1));
+            color: #fff;
+            cursor: pointer;
+            text-shadow: 0 0 1vmin var(--glow-color);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.8rem, 2.5vmin, 1.4rem);
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        #spinButton:not(:disabled):hover {
+            background-color: rgba(0, 255, 195, 0.4);
+            box-shadow: 0 0 2vmin var(--glow-color);
+            transform: scale(1.05);
+        }
+        #spinButton:disabled {
+            filter: grayscale(1) brightness(0.7);
+            cursor: not-allowed;
+        }
+        #spinButton svg {
+            width: 40%;
+            height: 40%;
+            fill: currentColor;
+            transition: transform 0.5s;
+        }
+        #spinButton:not(:disabled):hover svg {
+            transform: rotate(180deg);
+        }
+
+        #autoSpinButton {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1rem, 2vmin, 1.5rem); 
+            padding: 1.5vmin 3vmin; 
+            border: 2px solid var(--glow-color);
+            border-radius: 1.5vmin;
+            background-image: linear-gradient(to bottom, rgba(0, 255, 195, 0.3), rgba(0, 255, 195, 0.1));
+            color: #fff;
+            cursor: pointer;
+            text-shadow: 0 0 1vmin var(--glow-color);
+            transition: all 0.2s;
+        }
+        #autoSpinButton:not(.active):hover, #buyBonusButton:not(:disabled):hover {
+            background-color: rgba(0, 255, 195, 0.4);
+            box-shadow: 0 0 2vmin var(--glow-color);
+            transform: translateY(-2px);
+        }
+        #autoSpinButton.active { 
+            background: var(--secondary-glow); 
+            border-color: var(--secondary-glow); 
+            box-shadow: 0 0 2vmin var(--secondary-glow); 
+        }
+
+        .reels-container {
+            display: flex;
+            gap: 1vmin;
+            padding: 1.5vmin;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid var(--glow-color);
+            border-radius: 2vmin;
+            box-shadow: 0 0 3vmin var(--glow-color), inset 0 0 2vmin rgba(0, 255, 195, 0.5);
+            backdrop-filter: blur(8px);
+            position: relative;
+        }
+
+        .reel {
+            width: clamp(60px, 15vmin, 140px);
+            height: clamp(180px, 45vmin, 420px);
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(249, 0, 255, 0.1), rgba(0, 255, 195, 0.1));
+            border-radius: 1vmin;
+            position: relative;
+            box-shadow: inset 0 0 10px #000;
+        }
+        
+        .reel-strip { position: absolute; top: 0; left: 0; width: 100%; transition: opacity 0.3s ease-out; }
+        .symbol {
+            width: 100%;
+            height: clamp(60px, 15vmin, 140px);
+            display: flex; justify-content: center; align-items: center; box-sizing: border-box; position: relative;
+        }
+        .symbol img {
+            max-width: 85%; max-height: 85%; object-fit: contain; filter: drop-shadow(0 0 8px rgba(0,0,0,0.7)); transition: transform 0.3s, filter 0.3s;
+        }
+
+        #ui-panel {
+            flex-shrink: 0;
+            width: 100%;
+            padding: 1.5vmin 2vmin;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5vmin;
+            box-sizing: border-box;
+            border-top: 2px solid var(--glow-color);
+            box-shadow: 0 -5px 20px rgba(0, 255, 195, 0.3);
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            font-size: clamp(0.9rem, 2vmin, 1.2rem);
+        }
+        .info-box { text-align: center; }
+        .info-box span { font-family: 'Orbitron', sans-serif; display: block; font-size: clamp(1rem, 2.5vmin, 1.5rem); color: var(--glow-color);}
+        #message-box { font-family: 'Orbitron', sans-serif; font-size: clamp(1.1rem, 3vmin, 1.8rem); color: var(--win-glow-color); text-shadow: 0 0 10px var(--win-glow-color);}
+        
+        #bet-selection-bar {
+            display: flex;
+            gap: 1.5vmin;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 1vmin 0;
+        }
+        .bet-select-btn {
+            font-family: 'Orbitron', sans-serif;
+            background: rgba(0,0,0,0.4);
+            border: 2px solid rgba(0, 255, 195, 0.5);
+            color: #fff;
+            padding: 1vmin 2vmin;
+            border-radius: 1vmin;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: clamp(0.9rem, 2vmin, 1.3rem);
+        }
+        .bet-select-btn:hover {
+            border-color: var(--glow-color);
+            background: rgba(0, 255, 195, 0.2);
+        }
+        .bet-select-btn.active {
+            background: var(--glow-color);
+            color: #000;
+            border-color: var(--glow-color);
+            box-shadow: 0 0 15px var(--glow-color);
+            transform: scale(1.05);
+        }
+        
+        #buyBonusButton {
+             font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1rem, 2vmin, 1.5rem); 
+            padding: 1.5vmin 3vmin; 
+            border: 2px solid var(--secondary-glow);
+            border-radius: 1.5vmin;
+            background-image: linear-gradient(to bottom, rgba(249, 0, 255, 0.3), rgba(249, 0, 255, 0.1));
+            color: #fff;
+            cursor: pointer;
+            text-shadow: 0 0 1vmin var(--secondary-glow);
+            transition: all 0.2s;
+        }
+        #buyBonusButton:disabled {
+            filter: grayscale(1) brightness(0.7);
+            cursor: not-allowed;
+        }
+
+        h1.title { display: none; } /* Title is hidden as per new layout */
+
+        /* Win/Animation styles remain unchanged */
+        #win-lines-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
+        #win-lines-svg { overflow: visible; width: 100%; height: 100%; }
+        .win-line { fill: none; stroke: var(--secondary-glow); stroke-width: 5px; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 5px var(--secondary-glow)) drop-shadow(0 0 15px var(--secondary-glow)); stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: draw-line 0.8s ease-out forwards, blink-line 1s linear infinite 0.8s; }
+        @keyframes draw-line { to { stroke-dashoffset: 0; } }
+        @keyframes blink-line { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .symbol.win-pulse img { animation: win-pulse-anim 1s ease-out infinite; }
+        @keyframes win-pulse-anim { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px var(--win-glow-color)) brightness(1.2); } 50% { transform: scale(1.25); filter: drop-shadow(0 0 25px var(--win-glow-color)) drop-shadow(0 0 10px #fff) brightness(1.8); } }
+        .symbol.scatter-land img { animation: scatter-land-anim 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes scatter-land-anim { 0% { transform: scale(0.2) rotate(-360deg); opacity: 0; } 60% { transform: scale(1.3); } 100% { transform: scale(1); opacity: 1; } }
+        .symbol.scatter-trigger { z-index: 10; }
+        .symbol.scatter-trigger img { animation: scatter-trigger-anim 1.5s ease-in-out infinite; }
+        @keyframes scatter-trigger-anim { 0%, 100% { transform: scale(1.1) translateY(-5%); filter: drop-shadow(0 0 15px var(--scatter-glow-color)) drop-shadow(0 0 25px var(--scatter-glow-color)) brightness(1.5); } 50% { transform: scale(1.3) translateY(-10%); filter: drop-shadow(0 0 30px var(--scatter-glow-color)) drop-shadow(0 0 50px #fff) brightness(2.0); } }
+        .symbol.expanding { position: absolute; left: 0; width: 100%; z-index: 50; animation: expand-symbol 0.7s forwards; }
+        @keyframes expand-symbol { 0% { transform: scale(0.8); opacity: 0; } 60% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 35px var(--win-glow-color)); } 100% { transform: scale(1); opacity: 1; } }
+        #game-area.anticipation-glow .reels-container { animation: anticipation-pulse 1.2s infinite; }
+        @keyframes anticipation-pulse { 0%, 100% { box-shadow: 0 0 3vmin var(--glow-color), inset 0 0 2vmin rgba(0, 255, 195, 0.5); } 50% { box-shadow: 0 0 8vmin var(--anticipation-glow-color), inset 0 0 4vmin var(--anticipation-glow-color); } }
+
+        /* Modal styles remain unchanged */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; text-align: center; color: #fff; z-index: 1000; }
+        .modal-content { font-family: 'Orbitron', sans-serif; animation: modal-appear 1s forwards; background: rgba(10, 0, 20, 0.95); border: 2px solid var(--glow-color); border-radius: 2vmin; padding: 3vmin; max-width: 90vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 0 50px var(--secondary-glow); }
+        @keyframes modal-appear { 0% { transform: scale(0.5) rotate(-15deg); opacity: 0; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+        .modal-title { font-size: 5vmin; color: var(--glow-color); text-shadow: 0 0 2vmin var(--glow-color); }
+        .modal-subtitle { font-size: 4vmin; margin-top: 2vmin; }
+        #expanding-symbol-info { display: flex; align-items: center; justify-content: center; gap: 2vmin; margin-top: 1vmin; }
+        #expanding-symbol-display { width: 10vmin; height: 10vmin; }
+        #bonus-transition-screen { cursor: pointer; z-index: 2000; flex-direction: column; }
+        .bonus-transition-content { font-family: 'Orbitron', sans-serif; text-align: center; animation: bonus-pulse 1.5s infinite; }
+        .bonus-transition-content h1 { font-size: clamp(3rem, 10vmin, 8rem); color: var(--win-glow-color); text-shadow: 0 0 10px var(--win-glow-color), 0 0 30px var(--win-glow-color), 0 0 60px var(--secondary-glow); margin: 0; }
+        .bonus-transition-content p { font-size: clamp(1rem, 3vmin, 2rem); color: #fff; margin-top: 2vmin; text-shadow: 0 0 10px #000; }
+        @keyframes bonus-pulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.05); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        
+        <div id="game-area">
+            <div id="left-panel" class="side-panel">
+                 <div class="lines-display">
+                    <span>10</span>
+                    <p>ЛИНИИ</p>
+                </div>
+            </div>
+
+            <div class="reels-container">
+                <div class="reel" id="reel0"></div>
+                <div class="reel" id="reel1"></div>
+                <div class="reel" id="reel2"></div>
+                <div class="reel" id="reel3"></div>
+                <div class="reel" id="reel4"></div>
+            </div>
+            
+            <div id="right-panel" class="side-panel">
+                <button id="spinButton">
+                    <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"></path></svg>
+                    <span id="spin-text">ЗАВЪРТИ</span>
+                </button>
+                <button id="autoSpinButton">AUTO</button>
+                 <button id="buyBonusButton">КУПИ БОНУС</button>
+            </div>
+
+             <div id="win-lines-container">
+                <svg id="win-lines-svg"></svg>
+            </div>
+        </div>
+
+        <div id="ui-panel">
+            <div class="info-bar">
+                <div class="info-box">Баланс:<span id="balance">1000</span></div>
+                <div class="info-box" id="message-box">ИЗБЕРЕТЕ ЗАЛОГ</div>
+                <div class="info-box">Печалба:<span id="win">0</span></div>
+            </div>
+            <div id="bet-selection-bar">
+                <!-- Bet buttons will be generated by JS -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="bonus-modal">
+        <div class="modal-content">
+            <h2 id="modal-title" class="modal-title">БОНУС ИГРА!</h2>
+            <p id="modal-subtitle" class="modal-subtitle"></p>
+            <div id="expanding-symbol-info">
+                <h3>Специален Символ:</h3>
+                <img id="expanding-symbol-display" src="" alt="Expanding Symbol">
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="bonus-transition-screen">
+        <div class="bonus-transition-content">
+            <h1>БОНУС ИГРА!</h1>
+            <p>НАТИСНЕТЕ, ЗА ДА ПРОДЪЛЖИТЕ</p>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const SYMBOLS = {
+            'angel1': { weight: 20, src: 'angel1.png', payout: { '3': 5,  '4': 10,  '5': 20  }},
+            'angel2': { weight: 18, src: 'angel2.png', payout: { '3': 10, '4': 20,  '5': 40  }},
+            'angel3': { weight: 15, src: 'angel3.png', payout: { '3': 15, '4': 30,  '5': 60  }},
+            'angel4': { weight: 12, src: 'angel4.png', payout: { '3': 20, '4': 40,  '5': 80  }},
+            'angel5': { weight: 10, src: 'angel5.png', payout: { '3': 30, '4': 60,  '5': 120 }},
+            'angel6': { weight: 8,  src: 'angel6.png', payout: { '3': 50, '4': 100, '5': 200 }},
+            'angel7': { weight: 6,  src: 'angel7.png', payout: { '3': 100,'4': 200, '5': 400 }},
+            'angel8': { weight: 4,  src: 'angel8.png', payout: { '3': 200,'4': 400, '5': 800 }},
+            'wild':   { weight: 2,  src: 'wild.png',   isWild: true, payout: { '3': 250, '4': 500, '5': 1000 }},
+            'scatter':{ weight: 5,  src: 'scatter.png',spins: 10, isScatter: true }
+        };
+
+        const REGULAR_SYMBOLS = Object.keys(SYMBOLS).filter(k => !SYMBOLS[k].isWild && !SYMBOLS[k].isScatter);
+
+        const REEL_COUNT = 5;
+        const SYMBOLS_PER_REEL_VISIBLE = 3;
+        const PAYLINES = [ // Simplified to 10 lines
+            [1, 1, 1, 1, 1], [0, 0, 0, 0, 0], [2, 2, 2, 2, 2], [0, 1, 2, 1, 0], [2, 1, 0, 1, 2],
+            [0, 0, 1, 2, 2], [2, 2, 1, 0, 0], [1, 0, 0, 0, 1], [1, 2, 2, 2, 1], [0, 1, 1, 1, 2]
+        ];
+        
+        const BET_AMOUNTS = [10, 20, 50, 100, 200, 500];
+        const MAX_WIN_MULTIPLIER = 2500;
+        const BONUS_BUY_COST_MULTIPLIER = 100;
+
+        let balance = 1000;
+        let currentBetIndex = 0;
+        let bet = BET_AMOUNTS[currentBetIndex];
+        let isSpinning = false;
+        let isAutoSpinning = false;
+        let freeSpinsRemaining = 0;
+        let expandingSymbol = null;
+
+        const spinButton = document.getElementById('spinButton');
+        const autoSpinButton = document.getElementById('autoSpinButton');
+        const buyBonusButton = document.getElementById('buyBonusButton');
+        const balanceDisplay = document.getElementById('balance');
+        const winDisplay = document.getElementById('win');
+        const reels = Array.from({ length: REEL_COUNT }, (_, i) => document.getElementById(`reel${i}`));
+        const gameArea = document.getElementById('game-area');
+        const winLinesSvg = document.getElementById('win-lines-svg');
+        const betSelectionBar = document.getElementById('bet-selection-bar');
+        const messageBox = document.getElementById('message-box');
+        
+        const reelStrips = [];
+
+        function createWeightedStrip() {
+            const strip = [];
+            for (const key in SYMBOLS) {
+                for (let i = 0; i < SYMBOLS[key].weight; i++) strip.push(key);
+            }
+            return strip.sort(() => Math.random() - 0.5);
+        }
+        
+        function initializeReels() {
+            reels.forEach((reelElement) => {
+                reelElement.innerHTML = '';
+                const reelStripElement = document.createElement('div');
+                reelStripElement.className = 'reel-strip';
+                const weightedStrip = createWeightedStrip();
+                reelStrips.push(weightedStrip);
+
+                const totalSymbols = weightedStrip.length * 3; 
+                for(let i = 0; i < totalSymbols; i++) {
+                    const symbolKey = weightedStrip[i % weightedStrip.length];
+                    const symbolElement = document.createElement('div');
+                    symbolElement.className = 'symbol';
+                    const img = document.createElement('img');
+                    img.src = SYMBOLS[symbolKey].src;
+                    img.alt = symbolKey;
+                    img.loading = 'lazy';
+                    symbolElement.appendChild(img);
+                    reelStripElement.appendChild(symbolElement);
+                }
+                reelElement.appendChild(reelStripElement);
+            });
+        }
+        
+        function initializeUI() {
+            betSelectionBar.innerHTML = '';
+            BET_AMOUNTS.forEach((amount, index) => {
+                const button = document.createElement('button');
+                button.classList.add('bet-select-btn');
+                button.textContent = (amount / 10).toFixed(2); // Display as 1.00, 2.00 etc.
+                button.dataset.index = index;
+                betSelectionBar.appendChild(button);
+            });
+            updateBetSelection();
+            updateBalanceDisplay();
+            updateWin(0);
+        }
+        
+        function updateBetSelection() {
+            bet = BET_AMOUNTS[currentBetIndex];
+            document.querySelectorAll('.bet-select-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.index) === currentBetIndex);
+            });
+        }
+
+        async function spin(isFreeSpin = false) {
+            if (isSpinning) return;
+            
+            if (!isFreeSpin && freeSpinsRemaining === 0 && balance < bet) {
+                if(isAutoSpinning) toggleAutoSpin();
+                messageBox.textContent = "Недостатъчен Баланс";
+                return;
+            }
+
+            isSpinning = true;
+            setControlsDisabled(true);
+            
+            clearAnimations();
+            await updateWin(0);
+            messageBox.textContent = "УСПЕХ!";
+            
+            if (freeSpinsRemaining > 0) {
+                freeSpinsRemaining--;
+                updateSpinButtonText();
+            } else if (!isFreeSpin) {
+                balance -= bet;
+            }
+            updateBalanceDisplay();
+
+            let results = [];
+            const finalIndexes = [];
+            
+            for (let i = 0; i < REEL_COUNT; i++) {
+                const strip = reelStrips[i];
+                const randomIndex = Math.floor(Math.random() * strip.length);
+                finalIndexes.push(randomIndex);
+                results.push([
+                    strip[(randomIndex + 0) % strip.length],
+                    strip[(randomIndex + 1) % strip.length],
+                    strip[(randomIndex + 2) % strip.length]
+                ]);
+            }
+            
+            const spinPromises = reels.map((reel, i) => {
+                return new Promise(async (resolve) => {
+                    const reelStripElement = reel.querySelector('.reel-strip');
+                    const strip = reelStrips[i];
+                    const symbolHeight = reel.clientHeight / SYMBOLS_PER_REEL_VISIBLE;
+                    
+                    const baseTargetPosition = finalIndexes[i] * symbolHeight;
+                    const loopOffset = strip.length * symbolHeight;
+                    
+                    reelStripElement.style.transition = 'none';
+                    reelStripElement.style.transform = `translateY(-${baseTargetPosition + loopOffset}px)`;
+                    reelStripElement.offsetHeight; 
+
+                    let landedScatters = 0;
+                    results.slice(0, i).forEach(r => r.forEach(s => { if (SYMBOLS[s]?.isScatter) landedScatters++; }));
+                    
+                    let duration = 1.5 + i * 0.3;
+                    if (freeSpinsRemaining === 0 && landedScatters >= 2 && gameArea) {
+                        gameArea.classList.add('anticipation-glow');
+                        duration = 4 + i * 0.5;
+                    }
+                    
+                    reelStripElement.style.transition = `transform ${duration}s cubic-bezier(0.25, 1, 0.5, 1)`;
+                    reelStripElement.style.transform = `translateY(-${baseTargetPosition}px)`;
+
+                    await new Promise(res => setTimeout(res, duration * 1000));
+                                            
+                    results[i].forEach((symbolKey, symbolIndex) => {
+                        if (SYMBOLS[symbolKey]?.isScatter) {
+                            const symbolElement = getSymbolElement(i, finalIndexes[i] + symbolIndex);
+                            if (symbolElement) symbolElement.classList.add('scatter-land');
+                        }
+                    });
+                    resolve();
+                });
+            });
+            
+            await Promise.all(spinPromises);
+            
+            gameArea.classList.remove('anticipation-glow');
+            const { hasWin, bonusTriggered, winAmount } = await checkWin(results, finalIndexes);
+            
+            if (!hasWin) {
+                messageBox.textContent = "ИЗБЕРЕТЕ ЗАЛОГ";
+            } else {
+                 messageBox.textContent = `ПЕЧАЛБА: ${(winAmount / 10).toFixed(2)}`;
+            }
+            
+            handleNextAction(hasWin, bonusTriggered);
+        }
+        
+        // --- EVENT LISTENERS ---
+        spinButton.addEventListener('click', () => spin());
+        autoSpinButton.addEventListener('click', toggleAutoSpin);
+        buyBonusButton.addEventListener('click', buyBonus);
+
+        betSelectionBar.addEventListener('click', (e) => {
+            const button = e.target.closest('.bet-select-btn');
+            if (button && !isSpinning) {
+                currentBetIndex = parseInt(button.dataset.index);
+                updateBetSelection();
+            }
+        });
+
+        // Spacebar to Spin
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                // Prevent spin if a modal is open
+                if (document.querySelector('.modal[style*="display: flex"]')) return;
+                spinButton.click();
+            }
+        });
+
+        function toggleAutoSpin() {
+            isAutoSpinning = !isAutoSpinning;
+            autoSpinButton.classList.toggle('active', isAutoSpinning);
+            if (isAutoSpinning) {
+                autoSpinButton.textContent = "СТОП";
+                if(!isSpinning) spin();
+            } else {
+                autoSpinButton.textContent = "AUTO";
+            }
+        }
+        
+        function setControlsDisabled(disabled) {
+            spinButton.disabled = disabled;
+            autoSpinButton.disabled = disabled && !isAutoSpinning;
+            buyBonusButton.disabled = disabled || freeSpinsRemaining > 0;
+            betSelectionBar.style.pointerEvents = disabled ? 'none' : 'auto';
+        }
+
+        // --- ALL OTHER FUNCTIONS (win checking, drawing lines etc.) are mostly the same ---
+        // ... just copying them here for completeness.
+
+        function handleNextAction(hasWin, bonusTriggered) {
+            const winDelay = hasWin ? (expandingSymbol ? 2500 : 1500) : 250;
+            const autoSpinDelay = hasWin ? 2500 : 1200;
+
+            if (bonusTriggered) { return; }
+
+            if (freeSpinsRemaining > 0) {
+                setTimeout(() => { 
+                    isSpinning = false; 
+                    spin(true); 
+                }, winDelay);
+            } else {
+                if (expandingSymbol) {
+                    expandingSymbol = null;
+                    updateSpinButtonText();
+                }
+                if (isAutoSpinning) {
+                    setTimeout(() => { 
+                        isSpinning = false; 
+                        spin(); 
+                    }, autoSpinDelay);
+                } else {
+                    isSpinning = false;
+                    setControlsDisabled(false);
+                }
+            }
+        }
+        
+        function clearAnimations() {
+            winLinesSvg.innerHTML = '';
+            reels.forEach(reel => {
+                const expandingSymbols = reel.querySelectorAll('.symbol.expanding');
+                expandingSymbols.forEach(el => el.remove());
+                
+                const strip = reel.querySelector('.reel-strip');
+                if (strip) { strip.style.opacity = '1'; }
+            });
+
+            document.querySelectorAll('.symbol').forEach(el => { el.className = 'symbol'; });
+            gameArea.classList.remove('anticipation-glow');
+        }
+        
+        async function checkWin(results, finalIndexes) {
+            let totalWin = 0; const winningLines = []; const winningPositions = new Set();
+            let scatterCount = 0; const scatterPositions = []; let currentBalance = balance;
+
+            results.forEach((reelResult, reelIndex) => {
+                reelResult.forEach((symbolKey, symbolIndex) => {
+                    if (SYMBOLS[symbolKey]?.isScatter) {
+                        scatterCount++;
+                        scatterPositions.push({reel: reelIndex, pos: symbolIndex});
+                    }
+                });
+            });
+
+            PAYLINES.forEach((line) => {
+                let payingSymbolKey = null;
+                for (let i = 0; i < REEL_COUNT; i++) {
+                    const symbol = results[i][line[i]];
+                    if (!SYMBOLS[symbol]?.isWild) { payingSymbolKey = symbol; break; }
+                }
+                if (payingSymbolKey === null) payingSymbolKey = 'wild';
+                if (SYMBOLS[payingSymbolKey]?.isScatter) return;
+
+                let matchCount = 0;
+                for (let i = 0; i < REEL_COUNT; i++) {
+                    const currentSymbolKey = results[i][line[i]];
+                    if (currentSymbolKey === payingSymbolKey || SYMBOLS[currentSymbolKey]?.isWild) matchCount++;
+                    else break;
+                }
+
+                if (matchCount >= 3) {
+                    const symbolData = SYMBOLS[payingSymbolKey];
+                    if (symbolData?.payout?.[matchCount]) {
+                        const payout = symbolData.payout[matchCount] * (bet / 10);
+                        totalWin += payout;
+                        const lineCoords = [];
+                        for (let i = 0; i < matchCount; i++) {
+                            winningPositions.add(`${i}-${line[i]}`);
+                            lineCoords.push({reel: i, row: line[i]});
+                        }
+                        winningLines.push(lineCoords);
+                    }
+                }
+            });
+            
+            let hasExpansionWin = false;
+            if (expandingSymbol) {
+                const expandingReelsIndices = new Set();
+                results.forEach((reelResult, reelIndex) => {
+                    if (reelResult.includes(expandingSymbol)) expandingReelsIndices.add(reelIndex);
+                });
+
+                if (expandingReelsIndices.size >= 3) {
+                    hasExpansionWin = true;
+                    await new Promise(res => setTimeout(res, 500)); 
+
+                    expandingReelsIndices.forEach(reelIndex => {
+                        const reel = reels[reelIndex];
+                        reel.querySelector('.reel-strip').style.opacity = '0';
+                        for (let i = 0; i < SYMBOLS_PER_REEL_VISIBLE; i++) {
+                            const expandingClone = document.createElement('div');
+                            expandingClone.className = 'symbol expanding';
+                            const img = document.createElement('img');
+                            img.src = SYMBOLS[expandingSymbol].src;
+                            expandingClone.appendChild(img);
+                            expandingClone.style.top = `${i * (100 / SYMBOLS_PER_REEL_VISIBLE)}%`;
+                            reel.appendChild(expandingClone);
+                        }
+                    });
+
+                    await new Promise(res => setTimeout(res, 800)); 
+
+                    const payoutData = SYMBOLS[expandingSymbol].payout;
+                    const numExpandedReels = expandingReelsIndices.size;
+
+                    if (payoutData?.[numExpandedReels]) {
+                        const expansionPayout = payoutData[numExpandedReels] * (bet / 10) * PAYLINES.length;
+                        totalWin += expansionPayout;
+                        document.querySelectorAll('.symbol.expanding').forEach(el => el.classList.add('win-pulse'));
+                    }
+                }
+            }
+
+            if (totalWin > 0) {
+                await updateWin(totalWin, true);
+                flashWinningSymbols(winningPositions, finalIndexes);
+                drawWinningLines(winningLines);
+            }
+
+            const maxWin = bet * MAX_WIN_MULTIPLIER;
+            if (totalWin > maxWin) totalWin = maxWin;
+
+            if (totalWin > 0) {
+                balance = currentBalance + totalWin;
+                updateBalanceDisplay();
+            }
+            
+            let bonusTriggered = false;
+            if (freeSpinsRemaining === 0 && !expandingSymbol && scatterCount >= 3) {
+                bonusTriggered = true;
+                if(isAutoSpinning) toggleAutoSpin();
+                await triggerBonusAnimation(scatterPositions, finalIndexes);
+                
+                const bonusTransitionScreen = document.getElementById('bonus-transition-screen');
+                bonusTransitionScreen.style.display = 'flex';
+
+                bonusTransitionScreen.addEventListener('click', () => {
+                    bonusTransitionScreen.style.display = 'none';
+                    startBonus();
+                }, { once: true });
+            }
+            
+            return { hasWin: totalWin > 0 || hasExpansionWin, bonusTriggered, winAmount: totalWin };
+        }
+
+        function startBonus() {
+            freeSpinsRemaining = SYMBOLS.scatter.spins;
+            updateSpinButtonText();
+            expandingSymbol = REGULAR_SYMBOLS[Math.floor(Math.random() * REGULAR_SYMBOLS.length)];
+            
+            const bonusModal = document.getElementById('bonus-modal');
+            document.getElementById('modal-title').textContent = `БЕЗПЛАТНИ ЗАВЪРТАНИЯ!`;
+            document.getElementById('modal-subtitle').textContent = `${freeSpinsRemaining} Безплатни Игри`;
+            document.getElementById('expanding-symbol-display').src = SYMBOLS[expandingSymbol].src;
+            bonusModal.style.display = 'flex';
+            
+            setTimeout(() => {
+                bonusModal.style.display = 'none';
+                isSpinning = false;
+                spin(true);
+            }, 4000);
+        }
+        
+        function buyBonus() {
+            if (isSpinning || freeSpinsRemaining > 0) return;
+            const cost = bet * BONUS_BUY_COST_MULTIPLIER;
+            if (balance < cost) {
+                messageBox.textContent = "Недостатъчен Баланс";
+                return;
+            }
+            balance -= cost;
+            updateBalanceDisplay();
+            setControlsDisabled(true);
+
+            const bonusTransitionScreen = document.getElementById('bonus-transition-screen');
+            bonusTransitionScreen.style.display = 'flex';
+            bonusTransitionScreen.addEventListener('click', () => {
+                bonusTransitionScreen.style.display = 'none';
+                startBonus();
+            }, { once: true });
+        }
+
+        async function triggerBonusAnimation(scatterPos, finalIndexes) {
+            scatterPos.forEach(sp => {
+                const symbolElement = getSymbolElement(sp.reel, finalIndexes[sp.reel] + sp.pos);
+                if(symbolElement) symbolElement.classList.add('scatter-trigger');
+            });
+            await new Promise(res => setTimeout(res, 2500));
+        }
+
+        function getSymbolElement(reelIndex, stripIndex) {
+            const stripElement = reels[reelIndex].querySelector('.reel-strip');
+            if (!stripElement) return null;
+            return stripElement.children[stripIndex] || null;
+        }
+
+        function flashWinningSymbols(positions, finalIndexes) {
+            positions.forEach(pos => {
+                const [reelIndexStr, symbolIndexStr] = pos.split('-');
+                const reelIndex = parseInt(reelIndexStr, 10);
+                const symbolIndexOnReel = parseInt(symbolIndexStr, 10);
+                const indexInStrip = finalIndexes[reelIndex] + symbolIndexOnReel;
+                const symbolElement = getSymbolElement(reelIndex, indexInStrip);
+                if (symbolElement) {
+                    symbolElement.classList.add('win-pulse');
+                }
+            });
+        }
+        
+        function drawWinningLines(winningLines) {
+            const reelContainerRect = document.querySelector('.reels-container').getBoundingClientRect();
+            const svgRect = winLinesSvg.getBoundingClientRect();
+             if (reels.length === 0) return;
+
+            winningLines.forEach(lineCoords => {
+                const points = lineCoords.map(coord => {
+                    const reel = reels[coord.reel];
+                    const reelRect = reel.getBoundingClientRect();
+                    const symbolHeight = reelRect.height / SYMBOLS_PER_REEL_VISIBLE;
+                    
+                    const x = reelRect.left - svgRect.left + (reelRect.width / 2);
+                    const y = reelRect.top - svgRect.top + (coord.row * symbolHeight) + (symbolHeight / 2);
+
+                    return `${x},${y}`;
+                }).join(' ');
+                
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+                line.setAttribute('points', points);
+                line.setAttribute('class', 'win-line');
+                winLinesSvg.appendChild(line);
+            });
+        }
+
+        async function updateWin(amount, animate = false) {
+            if (amount === 0) {
+                winDisplay.textContent = '0.00'; return;
+            }
+            const targetAmount = (amount / 10).toFixed(2);
+            if (animate) {
+                const duration = 1000; const frameDuration = 1000 / 60; const totalFrames = Math.round(duration / frameDuration);
+                let frame = 0; const startValue = 0; const endValue = amount;
+                return new Promise(resolve => {
+                    const timer = setInterval(() => {
+                        frame++; const progress = frame / totalFrames;
+                        const currentAmount = startValue + (endValue - startValue) * progress;
+                        winDisplay.textContent = (currentAmount/10).toFixed(2);
+                        if (frame >= totalFrames) {
+                            clearInterval(timer);
+                            winDisplay.textContent = targetAmount;
+                            resolve();
+                        }
+                    }, frameDuration);
+                });
+            } else { winDisplay.textContent = targetAmount; }
+        }
+
+        function updateBalanceDisplay() { balanceDisplay.textContent = (balance/10).toFixed(2); }
+        function updateSpinButtonText() {
+            const spinText = document.getElementById('spin-text');
+            const spinIcon = spinButton.querySelector('svg');
+            if(freeSpinsRemaining > 0) {
+                spinText.textContent = `БЕЗПЛАТНИ: ${freeSpinsRemaining}`;
+                spinIcon.style.display = 'none';
+            } else {
+                spinText.textContent = 'ЗАВЪРТИ';
+                spinIcon.style.display = 'block';
+            }
+        }
+        
+        // Initial setup
+        initializeReels();
+        initializeUI();
+    });
+    </script>
+</body>
+</html>
